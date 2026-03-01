@@ -1,0 +1,84 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. THE USER (Seller & Buyer are the same entity)
+model User {
+  id        String    @id @default(cuid()) // CUID is safer/faster than UUID for web
+  email     String    @unique
+  name      String?
+  avatarUrl String?   // For profile picture
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relationships
+  products  Product[] // A user can sell many products
+  reviews   Review[]  // A user can write many reviews
+}
+
+// 2. THE PRODUCT (The core item)
+model Product {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  price       Decimal  @db.Decimal(10, 2) // Always use Decimal for money, never Float!
+  condition   Condition @default(USED)     // Enum for product state
+  
+  // Relations
+  sellerId    String
+  seller      User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  
+  images      Image[]  // One product, multiple images
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 3. IMAGES (Separate table allows multiple pics per product)
+model Image {
+  id        String   @id @default(cuid())
+  url       String
+  altText   String?
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// 4. CATEGORY (For filtering: "Electronics", "Books", etc.)
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique // URL-friendly name (e.g., "computer-science-books")
+  
+  products Product[]
+}
+
+// 5. REVIEWS (Trust system)
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5 stars
+  comment   String?
+  
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  
+  createdAt DateTime @default(now())
+}
+
+// ENUMS (Fixed options)
+enum Condition {
+  NEW
+  LIKE_NEW
+  USED
+  DAMAGED
+}
