@@ -6,6 +6,7 @@ import AuthButton from "@/components/AuthButton";
 import ProductForm from "@/components/ProductForm";
 import SearchBar from "@/components/SearchBar";
 import { searchProducts } from "@/app/actions";
+import DeleteButton from "@/components/DeleteButton";
 
 // Next.js passes URL parameters into the page component
 export default async function Home({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
@@ -76,7 +77,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
                   )}
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="text-lg font-medium text-white group-hover:text-indigo-400 transition-colors">{product?.title}</h3>
-                    <span className="text-lg font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md">₹{product?.price.toString()}</span>
+                    
+                    <div className="flex items-center gap-2">
+                      {/* NEW: Only show Delete button if the logged-in user owns the product */}
+                      {session?.user?.email === product?.seller?.email && (
+                        <DeleteButton productId={product.id} />
+                      )}
+                      
+                      <span className="text-lg font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md">
+                        ₹{product?.price.toString()}
+                      </span>
+                    </div>
                   </div>
                   <p className="text-slate-400 text-sm mb-4 line-clamp-2">{product?.description}</p>
                 </div>

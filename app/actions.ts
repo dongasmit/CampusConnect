@@ -68,34 +68,68 @@ export async function createProduct(formData: FormData) {
 
     revalidatePath("/");
 }
-
+//delete
 // Add this to the bottom of src/app/actions.ts
 
-export async function searchProducts(searchTerm: string) {
-  // 1. Convert the user's search query into an AI vector
-  const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
-  const result = await model.embedContent(searchTerm);
-  const embedding = result.embedding.values.slice(0, 768);
-  const embeddingString = `[${embedding.join(',')}]`;
+export async function deleteProduct(productId: string) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.email) throw new Error("Unauthorized");
 
-  // 2. Perform a nearest-neighbor mathematical search in PostgreSQL
-  // We use the <-> operator to calculate the Euclidean distance between vectors
+  // 1. Find the logged-in user
+  const user = await prisma.user.findUnique({ 
+    where: { email: session.user.email } 
+  });
+  
+  // 2. Find the product
+  const product = await prisma.product.findUnique({ 
+    where: { id: productId } 
+  });
+
+  if (!user || !product) throw new Error("Not found");
+
+  // 3. SECURITY CHECK: Ensure the person deleting it actually owns it
+  if (product.sellerId !== user.id) {
+    throw new Error("You do not have permission to delete this item.");
+  }
+
+  // 4. Delete from PostgreSQL
+  await prisma.product.delete({
+    where: { id: productId }
+  });
+
+  // 5. Refresh the page instantly
+  revalidatePath("/");
+}
+
+//aisearch bar 
+
+export async function searchProducts(searchTerm: string) {
+    // 1. Convert the user's search query into an AI vector
+    const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+    const result = await model.embedContent(searchTerm);
+    const embedding = result.embedding.values.slice(0, 768);
+    const embeddingString = `[${embedding.join(',')}]`;
+
+    // 2. Perform a nearest-neighbor mathematical search in PostgreSQL
+  // We removed the strict distance threshold, but kept the IS NOT NULL filter
+  // to safely ignore old products that lack AI embeddings.
   const rawResults = await prisma.$queryRaw<{id: string}[]>`
     SELECT id FROM "Product"
-    ORDER BY embedding <-> ${embeddingString}::vector
+    WHERE embedding IS NOT NULL 
+    ORDER BY embedding <=> ${embeddingString}::vector
     LIMIT 6
   `;
 
-  const ids = rawResults.map(r => r.id);
-  
-  if (ids.length === 0) return [];
+    const ids = rawResults.map(r => r.id);
 
-  // 3. Fetch the full product details for those matching IDs
-  const products = await prisma.product.findMany({
-    where: { id: { in: ids } },
-    include: { category: true, seller: true, images: true }
-  });
+    if (ids.length === 0) return [];
 
-  // 4. Return them strictly in the order of AI relevance (closest match first)
-  return ids.map(id => products.find(p => p?.id === id)).filter(Boolean);
+    // 3. Fetch the full product details for those matching IDs
+    const products = await prisma.product.findMany({
+        where: { id: { in: ids } },
+        include: { category: true, seller: true, images: true }
+    });
+
+    // 4. Return them strictly in the order of AI relevance (closest match first)
+    return ids.map(id => products.find(p => p?.id === id)).filter(Boolean);
 }
