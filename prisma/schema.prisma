@@ -1,35 +1,44 @@
 // prisma/schema.prisma
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"] // 1. NEW: Enable extensions feature
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]                      // 2. NEW: Activate pgvector in Neon
 }
 
 // 1. THE USER (Seller & Buyer are the same entity)
 model User {
-  id        String    @id @default(cuid()) // CUID is safer/faster than UUID for web
-  email     String    @unique
-  name      String?
-  avatarUrl String?   // For profile picture
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime? // NEW: Required by NextAuth
+  image         String?   // NEW: Renamed from avatarUrl for NextAuth compatibility
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   // Relationships
-  products  Product[] // A user can sell many products
-  reviews   Review[]  // A user can write many reviews
+  accounts      Account[] // NEW: Links to Google/GitHub accounts
+  sessions      Session[] // NEW: Tracks active logins
+  products      Product[] 
+  reviews       Review[]  
 }
 
-// 2. THE PRODUCT (The core item)
+// 2. THE PRODUCT
 model Product {
   id          String   @id @default(cuid())
   title       String
   description String
-  price       Decimal  @db.Decimal(10, 2) // Always use Decimal for money, never Float!
-  condition   Condition @default(USED)     // Enum for product state
+  price       Decimal  @db.Decimal(10, 2)
+  condition   Condition @default(USED)
+  
+  // 3. NEW: This field stores the mathematical representation of the product.
+  // Gemini text-embedding-004 outputs 768 dimensions.
+  embedding   Unsupported("vector(768)")? 
   
   // Relations
   sellerId    String
@@ -38,7 +47,7 @@ model Product {
   categoryId  String
   category    Category @relation(fields: [categoryId], references: [id])
   
-  images      Image[]  // One product, multiple images
+  images      Image[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -81,4 +90,39 @@ enum Condition {
   LIKE_NEW
   USED
   DAMAGED
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
