@@ -10,10 +10,11 @@ import DeleteButton from "@/components/DeleteButton";
 import Image from "next/image";
 
 // Next.js passes URL parameters into the page component
-export default async function Home({ searchParams }: { searchParams: { q?: string } }) {
+export default async function Home({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const session = await getServerSession(authOptions);
+  const resolvedSearchParams = await searchParams;
   
-  const query = searchParams.q;
+  const query = resolvedSearchParams?.q;
 
   let products;
 
