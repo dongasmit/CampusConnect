@@ -16,6 +16,8 @@
 
 ## 🚀 Overview
 
+Link: https://campus-connect-amber.vercel.app/
+
 **CampusConnect** is a robust, AI-driven marketplace designed specifically for university students. Whether you are looking to buy a secondhand textbook or sell your old dorm equipment, CampusConnect makes it effortless. 
 
 Powered by **Gemini Vector Embeddings**, our search engine doesn't just look for exact text matches—it understands the *intent* and *context* of what you are searching for, delivering highly relevant results instantly.
