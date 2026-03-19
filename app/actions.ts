@@ -131,5 +131,7 @@ export async function searchProducts(searchTerm: string) {
     });
 
     // 4. Return them strictly in the order of AI relevance (closest match first)
-    return ids.map(id => products.find(p => p?.id === id)).filter(Boolean);
+    return ids
+        .map(id => products.find(p => p?.id === id))
+        .filter((p): p is NonNullable<typeof p> => Boolean(p));
 }

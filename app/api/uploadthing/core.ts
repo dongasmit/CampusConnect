@@ -7,7 +7,7 @@ const f = createUploadthing();
 
 export const ourFileRouter = {
   // Define the route for product images
-  productImage: f({ image: { maxFileSize: "4MB", maxFileCount: 4 } })
+  productImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     // Middleware runs on your server BEFORE the upload happens
     .middleware(async () => {
       const session = await getServerSession(authOptions);

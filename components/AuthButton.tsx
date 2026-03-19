@@ -2,17 +2,21 @@
 "use client";
 
 import { signIn, signOut } from "next-auth/react";
+import { Session } from "next-auth";
+import Image from "next/image";
 
-export default function AuthButton({ session }: { session: any }) {
+export default function AuthButton({ session }: { session: Session | null }) {
   if (session) {
     return (
       <div className="flex items-center gap-4">
         {/* Display the Google Profile Picture */}
         {session.user?.image && (
-          <img 
+          <Image 
             src={session.user.image} 
             alt="Profile" 
-            className="w-10 h-10 rounded-full border-2 border-indigo-500"
+            width={40}
+            height={40}
+            className="rounded-full border-2 border-indigo-500"
           />
         )}
         <div className="flex flex-col">

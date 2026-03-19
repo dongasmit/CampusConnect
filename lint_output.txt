@@ -1,0 +1,19 @@
+
+C:\Users\smitt\campus-connect\app\page.tsx
+  73:23  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\smitt\campus-connect\components\AuthButton.tsx
+   6:60  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  12:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\smitt\campus-connect\components\DeleteButton.tsx
+  17:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\smitt\campus-connect\components\ProductForm.tsx
+  20:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\smitt\campus-connect\prisma\seed.ts
+  29:11  warning  'product' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 6 problems (1 error, 5 warnings)
+

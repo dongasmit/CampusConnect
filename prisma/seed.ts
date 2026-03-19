@@ -26,7 +26,7 @@ async function main() {
     })
 
     // 3. Create a dummy Product linked to the User and Category
-    const product = await prisma.product.create({
+    await prisma.product.create({
         data: {
             title: 'Cracking the Coding Interview',
             description: 'Barely used, helped me get an internship!',

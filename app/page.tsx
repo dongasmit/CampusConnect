@@ -7,14 +7,13 @@ import ProductForm from "@/components/ProductForm";
 import SearchBar from "@/components/SearchBar";
 import { searchProducts } from "@/app/actions";
 import DeleteButton from "@/components/DeleteButton";
+import Image from "next/image";
 
 // Next.js passes URL parameters into the page component
-export default async function Home({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function Home({ searchParams }: { searchParams: { q?: string } }) {
   const session = await getServerSession(authOptions);
   
-  // Await the search parameters
-  const params = await searchParams;
-  const query = params.q;
+  const query = searchParams.q;
 
   let products;
 
@@ -68,32 +67,32 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* We map over whatever the database returned (AI Search or Standard Feed) */}
             {products.map((product) => (
-              <div key={product?.id} className="group bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between overflow-hidden hover:border-indigo-500/50 transition-all hover:shadow-indigo-500/10">
+              <div key={product.id} className="group bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between overflow-hidden hover:border-indigo-500/50 transition-all hover:shadow-indigo-500/10">
                 <div>
-                  {product?.images && product.images.length > 0 && (
-                    <div className="w-full h-48 mb-4 rounded-lg overflow-hidden bg-slate-950">
-                      <img src={product.images[0].url} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {product.images && product.images.length > 0 && (
+                    <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden bg-slate-950">
+                      <Image src={product.images[0].url} alt={product.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
                   )}
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-medium text-white group-hover:text-indigo-400 transition-colors">{product?.title}</h3>
+                    <h3 className="text-lg font-medium text-white group-hover:text-indigo-400 transition-colors">{product.title}</h3>
                     
                     <div className="flex items-center gap-2">
                       {/* NEW: Only show Delete button if the logged-in user owns the product */}
-                      {session?.user?.email === product?.seller?.email && (
+                      {session?.user?.email === product.seller.email && (
                         <DeleteButton productId={product.id} />
                       )}
                       
                       <span className="text-lg font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md">
-                        ₹{product?.price.toString()}
+                        ₹{product.price.toString()}
                       </span>
                     </div>
                   </div>
-                  <p className="text-slate-400 text-sm mb-4 line-clamp-2">{product?.description}</p>
+                  <p className="text-slate-400 text-sm mb-4 line-clamp-2">{product.description}</p>
                 </div>
                 <div className="pt-4 border-t border-slate-800 flex justify-between items-center mt-4">
-                  <span className="text-xs font-medium bg-slate-800 text-slate-300 px-3 py-1 rounded-full">{product?.category?.name}</span>
-                  <p className="text-xs text-slate-500">Listed by <span className="text-slate-300">{product?.seller?.name}</span></p>
+                  <span className="text-xs font-medium bg-slate-800 text-slate-300 px-3 py-1 rounded-full">{product.category.name}</span>
+                  <p className="text-xs text-slate-500">Listed by <span className="text-slate-300">{product.seller.name}</span></p>
                 </div>
               </div>
             ))}

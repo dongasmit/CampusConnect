@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { UploadDropzone } from "@/lib/uploadthing";
 import { createProduct } from "@/app/actions";
+import Image from "next/image";
 
 export default function ProductForm() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export default function ProductForm() {
         
         {imageUrl ? (
           <div className="relative w-full h-48 rounded-lg overflow-hidden border border-slate-700">
-            <img src={imageUrl} alt="Uploaded preview" className="object-cover w-full h-full" />
+            <Image src={imageUrl} alt="Uploaded preview" fill className="object-cover" />
             <button 
               type="button"
               onClick={() => setImageUrl(null)}

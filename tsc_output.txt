@@ -1,0 +1,1 @@
+app/page.tsx(82,50): error TS18048: 'product' is possibly 'undefined'.

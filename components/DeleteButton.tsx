@@ -14,7 +14,7 @@ export default function DeleteButton({ productId }: { productId: string }) {
     setIsDeleting(true);
     try {
       await deleteProduct(productId);
-    } catch (error) {
+    } catch {
       alert("Failed to delete product.");
       setIsDeleting(false);
     }
